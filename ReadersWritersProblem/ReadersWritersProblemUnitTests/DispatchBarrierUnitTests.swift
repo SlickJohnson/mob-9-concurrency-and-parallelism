@@ -10,31 +10,28 @@ import XCTest
 @testable import ReadersWritersProblem
 
 class DispatchBarrierUnitTests: XCTestCase {
-    
-    let iterations = 200_000
-    
-    var user: DBUser!
-    
-    override func setUp() {
-        super.setUp()
-        user = DBUser.current
-    }
-    
-    func testDispatchBarrierReadersWritersProblem() {
-        // solve with dispatch barriers
-        let expectation = self.expectation(description: "com.makeschool.expectation")
 
-        for _ in 0..<iterations {
-            print("read: \(user.age)")
-            
-            self.user.age += 1
+  let iterations = 200_000
+
+  var user: DBUser!
+
+  override func setUp() {
+    super.setUp()
+    user = DBUser.current
+  }
+
+  func testDispatchBarrierReadersWritersProblem() {
+    // solve with dispatch barriers
+    let concurrentQueue = DispatchQueue(label: "concurrentQueue", attributes: .concurrent)
+    for _ in 0..<iterations {
+      concurrentQueue.sync() {
+        print("read: \(self.user.age)")
+        concurrentQueue.async(flags: .barrier) {
+          self.user.age += 1
         }
-        
-        waitForExpectations(timeout: 10, handler: nil)
-        
-        XCTAssertEqual(self.iterations, self.user.age)
-        print("It is: \(self.iterations, self.user.age)")
-        expectation.fulfill()
+      }
     }
-    
+    XCTAssertEqual(self.iterations, self.user.age)
+    print("It is: \(self.iterations, self.user.age)")
+  }
 }
