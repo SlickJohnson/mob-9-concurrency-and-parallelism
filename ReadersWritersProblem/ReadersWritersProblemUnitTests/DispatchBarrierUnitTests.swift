@@ -24,7 +24,7 @@ class DispatchBarrierUnitTests: XCTestCase {
     // solve with dispatch barriers
     let concurrentQueue = DispatchQueue(label: "concurrentQueue", attributes: .concurrent)
     for _ in 0..<iterations {
-      concurrentQueue.sync() {
+      concurrentQueue.sync {
         print("read: \(self.user.age)")
         concurrentQueue.async(flags: .barrier) {
           self.user.age += 1
